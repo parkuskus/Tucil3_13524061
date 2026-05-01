@@ -67,3 +67,27 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Latex
+# Latex
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.synctex.gz
+*.dvi
+*.ps
+# latexmk
+.latexmkrc
+
+# Ignore markdown files in doc/ (including subfolders)
+doc/*.md
+doc/**/*.md
