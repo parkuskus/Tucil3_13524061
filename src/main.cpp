@@ -11,7 +11,11 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    const std::string path = argv[1];
+    std::string path = argv[1];
+    if (path.find('/') == std::string::npos && path.find('\\') == std::string::npos)
+    {
+        path = std::string("test/") + path;
+    }
 
     try
     {
