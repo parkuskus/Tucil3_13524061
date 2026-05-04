@@ -12,31 +12,26 @@ int main(int argc, char **argv)
     }
 
     const std::string path = argv[1];
-    t3::Parser parser;
-    t3::ParseResult parsed = parser.parseFile(path);
-    if (!parsed.ok())
+
+    try
     {
-        std::cout << "Input parse failed:\n";
-        for (const auto &error : parsed.errors())
-        {
-            std::cout << "- " << error << "\n";
-        }
+        t3::Parser parser;
+        t3::RawInput parsed = parser.parseFile(path);
+        t3::Validator validator;
+        t3::Board board = validator.validate(parsed);
+
+        std::cout << "Input OK: " << board.rows() << "x" << board.cols() << "\n";
+        std::cout << "Checkpoint max: " << board.maxCheckpoint() << "\n";
+    }
+    catch (const t3::AppException &ex)
+    {
+        std::cout << "Input error: " << ex.what() << "\n";
         return 1;
     }
-
-    t3::Validator validator;
-    t3::ValidationResult validated = validator.validate(parsed.raw());
-    if (!validated.ok())
+    catch (const std::exception &ex)
     {
-        std::cout << "Input validation failed:\n";
-        for (const auto &error : validated.errors())
-        {
-            std::cout << "- " << error << "\n";
-        }
+        std::cout << "Unexpected error: " << ex.what() << "\n";
         return 1;
     }
-
-    std::cout << "Input OK: " << validated.board().rows() << "x" << validated.board().cols() << "\n";
-    std::cout << "Checkpoint max: " << validated.board().maxCheckpoint() << "\n";
     return 0;
 }

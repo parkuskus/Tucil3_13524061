@@ -16,42 +16,33 @@ namespace t3
 
     } // namespace
 
-    Board &ValidationResult::board() { return board_; }
-    const Board &ValidationResult::board() const { return board_; }
-    const std::vector<std::string> &ValidationResult::errors() const { return errors_; }
-    bool ValidationResult::ok() const { return errors_.empty(); }
-    void ValidationResult::addError(const std::string &error) { errors_.push_back(error); }
-
-    ValidationResult Validator::validate(const RawInput &raw) const
+    Board Validator::validate(const RawInput &raw) const
     {
-        ValidationResult result;
+        Board board;
         if (raw.rows() <= 0 || raw.cols() <= 0)
         {
-            result.addError("Board dimensions must be positive.");
-            return result;
+            throw ValidationException("Board dimensions must be positive.");
         }
 
         if (static_cast<int>(raw.mapLines().size()) != raw.rows())
         {
-            result.addError("Board rows count does not match N.");
-            return result;
+            throw ValidationException("Board rows count does not match N.");
         }
 
         if (static_cast<int>(raw.costs().size()) != raw.rows())
         {
-            result.addError("Cost rows count does not match N.");
-            return result;
+            throw ValidationException("Cost rows count does not match N.");
         }
 
         for (int r = 0; r < raw.rows(); ++r)
         {
             if (static_cast<int>(raw.mapLines()[r].size()) != raw.cols())
             {
-                result.addError("Board row length mismatch at row " + std::to_string(r) + ".");
+                throw ValidationException("Board row length mismatch at row " + std::to_string(r) + ".");
             }
             if (static_cast<int>(raw.costs()[r].size()) != raw.cols())
             {
-                result.addError("Cost row length mismatch at row " + std::to_string(r) + ".");
+                throw ValidationException("Cost row length mismatch at row " + std::to_string(r) + ".");
             }
         }
 
@@ -67,26 +58,25 @@ namespace t3
                 char ch = raw.mapLines()[r][c];
                 if (!isAllowedChar(ch))
                 {
-                    result.addError(std::string("Invalid tile character: ") + ch + " at (" + std::to_string(r) + ", " + std::to_string(c) + ").");
-                    continue;
+                    throw ValidationException(std::string("Invalid tile character: ") + ch + " at (" + std::to_string(r) + ", " + std::to_string(c) + ").");
                 }
 
                 if (ch == 'Z')
                 {
                     ++startCount;
-                    result.board().setStart(Position(r, c));
+                    board.setStart(Position(r, c));
                 }
                 else if (ch == 'O')
                 {
                     ++goalCount;
-                    result.board().setGoal(Position(r, c));
+                    board.setGoal(Position(r, c));
                 }
                 else if (std::isdigit(static_cast<unsigned char>(ch)))
                 {
                     int value = ch - '0';
                     if (digitPositions.count(value) > 0)
                     {
-                        result.addError("Duplicate checkpoint digit: " + std::to_string(value) + ".");
+                        throw ValidationException("Duplicate checkpoint digit: " + std::to_string(value) + ".");
                     }
                     else
                     {
@@ -102,11 +92,11 @@ namespace t3
 
         if (startCount != 1)
         {
-            result.addError("Exactly one start tile (Z) is required.");
+            throw ValidationException("Exactly one start tile (Z) is required.");
         }
         if (goalCount != 1)
         {
-            result.addError("Exactly one goal tile (O) is required.");
+            throw ValidationException("Exactly one goal tile (O) is required.");
         }
 
         if (maxDigit >= 0)
@@ -115,19 +105,13 @@ namespace t3
             {
                 if (digitPositions.count(v) == 0)
                 {
-                    result.addError("Checkpoint sequence must be contiguous from 0 to " + std::to_string(maxDigit) + ". Missing " + std::to_string(v) + ".");
-                    break;
+                    throw ValidationException("Checkpoint sequence must be contiguous from 0 to " + std::to_string(maxDigit) + ". Missing " + std::to_string(v) + ".");
                 }
             }
         }
 
-        if (!result.ok())
-        {
-            return result;
-        }
-
-        result.board().init(raw.rows(), raw.cols());
-        result.board().setMaxCheckpoint(maxDigit);
+        board.init(raw.rows(), raw.cols());
+        board.setMaxCheckpoint(maxDigit);
         if (maxDigit >= 0)
         {
             std::vector<Position> checkpoints(static_cast<size_t>(maxDigit + 1));
@@ -135,14 +119,14 @@ namespace t3
             {
                 checkpoints[static_cast<size_t>(v)] = digitPositions[v];
             }
-            result.board().setCheckpoints(checkpoints);
+            board.setCheckpoints(checkpoints);
         }
 
         for (int r = 0; r < raw.rows(); ++r)
         {
             for (int c = 0; c < raw.cols(); ++c)
             {
-                result.board().setCost(r, c, raw.costs()[r][c]);
+                board.setCost(r, c, raw.costs()[r][c]);
                 char ch = raw.mapLines()[r][c];
                 Tile tile;
                 if (ch == '*')
@@ -170,11 +154,11 @@ namespace t3
                     tile.setType(TileType::Checkpoint);
                     tile.setValue(ch - '0');
                 }
-                result.board().setTile(r, c, tile);
+                board.setTile(r, c, tile);
             }
         }
 
-        return result;
+        return board;
     }
 
 } // namespace t3

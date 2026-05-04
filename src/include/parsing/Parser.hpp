@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "Exception/Exception.hpp"
+
 namespace t3
 {
 
@@ -26,24 +28,10 @@ namespace t3
         std::vector<std::vector<int>> costs_;
     };
 
-    class ParseResult
-    {
-    public:
-        RawInput &raw();
-        const RawInput &raw() const;
-        const std::vector<std::string> &errors() const;
-        bool ok() const;
-        void addError(const std::string &error);
-
-    private:
-        RawInput raw_;
-        std::vector<std::string> errors_;
-    };
-
     class Parser
     {
     public:
-        ParseResult parseFile(const std::string &path) const;
+        RawInput parseFile(const std::string &path) const;
     };
 
 } // namespace t3

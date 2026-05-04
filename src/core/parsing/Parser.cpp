@@ -35,50 +35,40 @@ namespace t3
         costs_[row][col] = value;
     }
 
-    RawInput &ParseResult::raw() { return raw_; }
-    const RawInput &ParseResult::raw() const { return raw_; }
-    const std::vector<std::string> &ParseResult::errors() const { return errors_; }
-    bool ParseResult::ok() const { return errors_.empty(); }
-    void ParseResult::addError(const std::string &error) { errors_.push_back(error); }
-
-    ParseResult Parser::parseFile(const std::string &path) const
+    RawInput Parser::parseFile(const std::string &path) const
     {
-        ParseResult result;
+        RawInput result;
         std::ifstream input(path);
         if (!input)
         {
-            result.addError("Failed to open input file: " + path);
-            return result;
+            throw IOException("Failed to open input file: " + path);
         }
 
         int rows = 0;
         int cols = 0;
         if (!(input >> rows >> cols))
         {
-            result.addError("Failed to read board dimensions (N M).");
-            return result;
+            throw ParseException("Failed to read board dimensions (N M).");
         }
 
         if (rows <= 0 || cols <= 0)
         {
-            result.addError("Board dimensions must be positive.");
-            return result;
+            throw ParseException("Board dimensions must be positive.");
         }
 
-        result.raw().setDimensions(rows, cols);
+        result.setDimensions(rows, cols);
 
         for (int r = 0; r < rows; ++r)
         {
             std::string row;
             if (!(input >> row))
             {
-                result.addError("Missing board row at index " + std::to_string(r) + ".");
-                return result;
+                throw ParseException("Missing board row at index " + std::to_string(r) + ".");
             }
-            result.raw().addMapLine(row);
+            result.addMapLine(row);
         }
 
-        result.raw().initCosts(rows, cols);
+        result.initCosts(rows, cols);
         for (int r = 0; r < rows; ++r)
         {
             for (int c = 0; c < cols; ++c)
@@ -86,10 +76,9 @@ namespace t3
                 int value = 0;
                 if (!(input >> value))
                 {
-                    result.addError("Missing cost value at row " + std::to_string(r) + ", col " + std::to_string(c) + ".");
-                    return result;
+                    throw ParseException("Missing cost value at row " + std::to_string(r) + ", col " + std::to_string(c) + ".");
                 }
-                result.raw().setCost(r, c, value);
+                result.setCost(r, c, value);
             }
         }
 
