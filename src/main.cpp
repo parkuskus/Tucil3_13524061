@@ -47,9 +47,19 @@ namespace
     bool parseHeuristic(const std::string &value, t3::HeuristicType &out)
     {
         std::string key = toLower(value);
+        if (key == "h1" || key == "manhattan")
+        {
+            out = t3::HeuristicType::ManhattanToTarget;
+            return true;
+        }
         if (key == "h2" || key == "remaining")
         {
             out = t3::HeuristicType::RemainingPlusManhattan;
+            return true;
+        }
+        if (key == "h3" || key == "weighted")
+        {
+            out = t3::HeuristicType::WeightedRemainingToGoal;
             return true;
         }
         return false;

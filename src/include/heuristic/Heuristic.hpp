@@ -7,7 +7,9 @@ namespace t3
 
     enum class HeuristicType
     {
-        RemainingPlusManhattan
+        ManhattanToTarget,
+        RemainingPlusManhattan,
+        WeightedRemainingToGoal
     };
 
     class Heuristic
@@ -19,6 +21,7 @@ namespace t3
         int manhattan(const Position &a, const Position &b) const;
         Position resolveTarget(const Board &board, int nextCheckpoint) const;
         int remainingCheckpoints(const Board &board, int nextCheckpoint) const;
+        int weightedRemainingToGoal(const Board &board, const Position &pos, int nextCheckpoint) const;
     };
 
 } // namespace t3

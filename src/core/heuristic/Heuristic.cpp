@@ -8,11 +8,20 @@ namespace t3
 
     int Heuristic::estimate(const Board &board, const Position &pos, int nextCheckpoint, HeuristicType type) const
     {
+        if (type == HeuristicType::ManhattanToTarget)
+        {
+            Position target = resolveTarget(board, nextCheckpoint);
+            return manhattan(pos, target);
+        }
         if (type == HeuristicType::RemainingPlusManhattan)
         {
             Position target = resolveTarget(board, nextCheckpoint);
             int remaining = remainingCheckpoints(board, nextCheckpoint);
             return remaining + manhattan(pos, target);
+        }
+        if (type == HeuristicType::WeightedRemainingToGoal)
+        {
+            return weightedRemainingToGoal(board, pos, nextCheckpoint);
         }
         return 0;
     }
@@ -39,6 +48,12 @@ namespace t3
         }
         int remaining = (board.maxCheckpoint() + 1) - nextCheckpoint;
         return std::max(0, remaining);
+    }
+
+    int Heuristic::weightedRemainingToGoal(const Board &board, const Position &pos, int nextCheckpoint) const
+    {
+        int remaining = remainingCheckpoints(board, nextCheckpoint);
+        return manhattan(pos, board.goal()) + remaining * 2;
     }
 
 } // namespace t3
