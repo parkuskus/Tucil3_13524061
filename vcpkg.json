@@ -1,0 +1,7 @@
+{
+  "name": "tucil3-13524061",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "sfml"
+  ]
+}
