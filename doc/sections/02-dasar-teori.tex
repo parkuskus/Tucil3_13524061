@@ -1,8 +1,31 @@
 \section{Algoritma Uniform Cost Search (UCS)}
 
+Uniform Cost Search (UCS) adalah algoritma pencarian yang mengembangkan node dengan biaya jalur terkecil $g(n)$ terlebih dahulu. UCS menjamin menemukan solusi dengan total biaya minimum apabila semua biaya tepi bernilai tidak negatif, karena selalu memilih state dengan $g$ terkecil untuk diekspansi \cite{dijkstra1959note,russell2010artificial}. Beberapa sifat penting UCS adalah sebagai berikut.
+\begin{itemize}
+    \item \textbf{Optimalitas}. UCS optimal jika biaya tiap langkah non-negatif.
+    \item \textbf{Keterlengkapan}. UCS akan menemukan solusi apabila ruang status berhingga dan ada path menuju tujuan.
+    \item \textbf{Kompleksitas}. Bergantung pada branching factor dan distribusi biaya. Pada kasus terburuk dapat menimbulkan eksplorasi besar jika banyak node memiliki biaya jalur serupa.
+\end{itemize}
+
 \section{Algoritma Greedy Best-First Search (GBFS)}
 
+Greedy Best-First Search (GBFS) merupakan algoritma pencarian yang memilih node untuk diekspansi berdasarkan nilai heuristik $h(n)$ saja, yakni node yang dianggap paling "dekat" ke tujuan menurut heuristik. GBFS tidak mempertimbangkan biaya jalur $g(n)$ sehingga dapat menjadi sangat cepat namun tidak menjamin optimalitas atau keterlengkapan dalam semua kasus \cite{russell2010artificial}. Karakteristik GBFS dapat dijabarkan sebagai berikut.
+\begin{itemize}
+    \item \textbf{Kecepatan}. Seringkali lebih cepat menemukan solusi dibanding pencarian yang mempertimbangkan $g(n)$, terutama bila heuristik sangat informatif.
+    \item \textbf{Non-optimal}. GBFS tidak menjamin menemukan solusi dengan biaya minimal.
+    \item \textbf{Sensitif terhadap heuristik}. kualitas heuristik sangat menentukan performa dan hasil pencarian.
+\end{itemize}
+
 \section{Algoritma A$^\ast$}
+
+A$^\ast$ (A-star) menggabungkan keuntungan UCS dan heuristik dengan menggunakan fungsi evaluasi
+$$f(n) = g(n) + h(n),$$
+di mana $g(n)$ adalah biaya jalur dari root ke node $n$ dan $h(n)$ adalah heuristik estimasi biaya dari $n$ ke tujuan. A$^\ast$ bersifat optimal jika heuristik $h$ adalah \emph{admissible} (tidak melebihkan cost sebenarnya) dan akan efisien apabila $h$ juga \emph{consistent} (monotonik) \cite{hart1968formal,russell2010artificial}. Sifat-sifat A$^\ast$ adalah sebagai berikut.
+\begin{itemize}
+    \item \textbf{Optimalitas}. Terjamin bila $h$ admissible.
+    \item \textbf{Efisiensi}. Jumlah node yang diekspansi seminimal mungkin di antara semua algoritma yang menggunakan heuristik yang sama dan tetap optimal.
+    \item \textbf{Ketergantungan heuristik}. Heuristik yang lebih informatif (mendekati nilai cost sebenarnya) akan mengurangi ruang pencarian.
+\end{itemize}
 
 \section{Komparasi Algoritma \textit{Pathfinding}}
 
