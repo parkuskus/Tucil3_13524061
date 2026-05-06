@@ -1,5 +1,477 @@
 \section{Arsitektur Program}
 
+Program solver Ice Sliding Puzzle diorganisir dengan arsitektur modular yang memisahkan tanggung jawab ke dalam berbagai modul independen. Desain ini memudahkan pemeliharaan, pengujian, dan pengembangan fitur baru.
+
+\subsection{Lapisan Arsitektur}
+
+Program terdiri dari beberapa lapisan logis sebagai berikut.
+
+\begin{itemize}
+    \item \textbf{Lapisan Parsing}. Membaca file input, memvalidasi format, dan mengonversi data mentah menjadi representasi internal (Board dan State).
+
+    \item \textbf{Lapisan Algoritma Pencarian}. Mengimplementasikan strategi pencarian (UCS, GBFS, A$^\ast$) yang menggunakan struktur data priority queue dan menjelajahi ruang keadaan.
+
+    \item \textbf{Lapisan Heuristik}. Menyediakan berbagai fungsi heuristik (ManhattanToTarget, RemainingPlusManhattan, WeightedRemainingToGoal) untuk menginformasikan pencarian.
+
+    \item \textbf{Lapisan Aturan}. Mendefinisikan aturan permainan, termasuk validasi gerakan, kalkulasi biaya, dan transisi keadaan (sliding mechanics).
+
+    \item \textbf{Lapisan Output}. Mengformat dan menampilkan hasil (jalur solusi, statistik, file output).
+
+    \item \textbf{Lapisan GUI}. Menyediakan antarmuka visual untuk interaksi pengguna, playback solusi, dan visualisasi board.
+\end{itemize}
+
+\subsection{Alur Eksekusi}
+
+Alur umum program adalah sebagai berikut.
+
+\begin{enumerate}
+    \item \textbf{Parsing}. Parser membaca file input dan membuat object Board dengan initial state.
+    \item \textbf{Validasi}. Validator memeriksa keaslian input (dimensi, karakter, target keadaan valid).
+    \item \textbf{Inisialisasi Pencarian}. Search object diinisialisasi dengan algoritma pilihan dan heuristik.
+    \item \textbf{Pencarian}. Algoritma pencarian menjalankan solve() dan mengekspansi node hingga menemukan solusi atau kehabisan resource.
+    \item \textbf{Rekonstruksi Jalur}. Dari node tujuan, trace kembali ke root untuk mendapatkan urutan gerakan.
+    \item \textbf{Output}. Output formatter mencetak solusi, statistik (node expanded, waktu, biaya), dan playback command.
+    \item \textbf{GUI}. Jika aktif, GUI menampilkan visualisasi board dan memungkinkan pengguna playback solusi secara interaktif.
+\end{enumerate}
+
+\subsection{Desain Object-Oriented Programming (OOP)}
+
+Program solver dibangun menggunakan paradigma Object-Oriented Programming (OOP) yang memanfaatkan konsep enkapsulasi, abstraksi, dan modularitas untuk mengorganisir logika kompleks ke dalam unit-unit yang terkelola dengan baik.
+
+\subsubsection{Konsep OOP dalam Arsitektur}
+
+Setiap modul dalam program direpresentasikan sebagai \textbf{class} (kelas) dalam C++ yang mengenkapsulasi data (atribut/member variable) dan fungsi operasi (metode/member function). Prinsip-prinsip OOP yang diterapkan adalah
+
+\begin{itemize}
+    \item \textbf{Enkapsulasi (Encapsulation)}: Data dan fungsi yang terkait dikelompokkan dalam satu class. Akses ke data dikendalikan melalui visibility modifier (private, public, protected), memastikan bahwa state objek hanya dapat diubah melalui interface terdefinisi. Contoh: Class Board menyimpan grid dan checkpoint sebagai private members, dan hanya menyediakan method public seperti \texttt{isGoal()}, \texttt{getState()} untuk akses yang terkontrol.
+
+    \item \textbf{Abstraksi (Abstraction)}: Kompleksitas internal disembunyikan di balik interface yang sederhana. Pengguna module tidak perlu tahu detail implementasi. Contoh: Class Search menyembunyikan detail struktur internal frontier (priority queue) dan hanya mengekspos method \texttt{solve()} yang mengembalikan solusi.
+
+    \item \textbf{Modularitas (Modularity)}: Setiap class memiliki tanggung jawab tunggal dan jelas (Single Responsibility Principle). Hubungan antar class didefinisikan dengan jelas melalui dependency. Contoh: Board hanya merepresentasikan state; Rules hanya menangani mekanik permainan; Search hanya menangani strategi pencarian.
+
+    \item \textbf{Reusability}: Classes dirancang untuk dapat digunakan kembali dalam konteks berbeda. Contoh: Class Board dapat digunakan oleh Search, Validator, Output, dan GUI tanpa modifikasi.
+\end{itemize}
+
+\subsubsection{Struktur Class dan Member}
+
+Setiap modul utama diwakili oleh satu atau lebih class dengan struktur sebagai berikut.
+
+\begin{itemize}
+    \item \textbf{Member Variable (Atribut)}: Data yang menyimpan state objek. Contoh:
+          \begin{itemize}
+              \item Board: \texttt{grid[][]}, \texttt{rows}, \texttt{cols}, \texttt{startPos}, \texttt{goalPos}, \texttt{checkpoints[]}
+              \item Search: \texttt{frontier} (priority queue), \texttt{bestCost} (map), \texttt{explored} (set), \texttt{algorithm\_type}, \texttt{heuristic\_type}
+              \item Rules: \texttt{board} (reference to Board), \texttt{tileWeights} (map of costs)
+              \item Heuristic: Static methods tidak menyimpan state, hanya fungsi estimasi pure
+          \end{itemize}
+
+    \item \textbf{Member Function (Metode)}: Fungsi yang beroperasi pada state objek atau menjalankan logika spesifik modul. Contoh:
+          \begin{itemize}
+              \item Board: \texttt{isGoal()}, \texttt{getState()}, \texttt{getActorPos()}, \texttt{getCheckpoints()}, \texttt{setActorPos()}
+              \item Search: \texttt{solve()}, \texttt{computePriority()}, \texttt{backtrack()}, \texttt{expandNode()}
+              \item Rules: \texttt{applyMove()}, \texttt{isValidMove()}, \texttt{calculateCost()}
+              \item Heuristic: \texttt{estimate()} (static), dengan overload untuk berbagai tipe heuristik
+          \end{itemize}
+
+    \item \textbf{Constructor \& Destructor}: Constructor menginisialisasi member variable dengan nilai default atau parameter yang diberikan. Destructor membersihkan resource yang dialokasikan dinamis (jika ada). Contoh:
+          \begin{itemize}
+              \item \texttt{Board(int rows, int cols)}: Inisialisasi grid kosong
+              \item \texttt{Search(SearchType type, HeuristicType htype)}: Inisialisasi frontier dan parameter pencarian
+          \end{itemize}
+
+    \item \textbf{Getter \& Setter}: Method yang memberikan akses controlled ke private member. Getter mengembalikan nilai member; setter mengubah nilai dengan validasi opsional. Contoh: \texttt{getRows()}, \texttt{getCols()}, \texttt{setHeuristic(HeuristicType type)}.
+\end{itemize}
+
+\subsubsection{Interaksi Antar Object}
+
+Program berjalan melalui serangkaian interaksi antar object sebagai berikut.
+
+\begin{enumerate}
+    \item Parser menciptakan object Board dari file input: \texttt{Board board = parser.parseFiles (filename);}
+
+    \item Validator menerima reference ke Board dan memeriksa validitas: \texttt{validator.validate (board);}
+
+    \item Search object diinisialisasi dengan reference ke Board dan tipe algoritma: \texttt{Search searcher(board, SearchType::ASTAR, HeuristicType::Manhattan);}
+
+    \item Dalam \texttt{Search::solve()}, method \texttt{Rules::applyMove()} dipanggil untuk setiap successor: \\
+          \texttt{Outcome out = rules.applyMove(board, pos, dir);}
+
+    \item Heuristik digunakan dalam \texttt{computePriority()}: \\
+          \texttt{int h = Heuristic::estimate(board, pos, ...);}
+
+    \item Hasil akhir dikemas dalam object Output yang berisi solusi dan statistik: \\
+          \texttt{Output result(solution\_path, expanded\_count, total\_cost);}
+
+    \item Jika GUI aktif, object GUI menggunakan Playback object untuk animasi: \\
+          \texttt{Playback playback(solution\_path, board); playback.step();}
+\end{enumerate}
+
+
 \section{Direktori Program}
 
+% Visualisasi struktur direktori dipindahkan ke bawah (pohon forest)
+
+\subsection{Penjelasan Direktori Utama}
+
+
+\begin{itemize}
+    \item \textbf{src/}: Berisi seluruh source code C++ yang terbagi ke dalam core modules (board, search, heuristic, dll) dan dua entry point utama:
+          \begin{itemize}
+              \item \texttt{main.cpp}: Entry point CLI solver.
+              \item \texttt{gui\_main.cpp}: Entry point GUI solver (menggunakan raylib).
+          \end{itemize}
+
+    \item \textbf{src/include/}: Mirror struktur src/core, berisi header files (.hpp) dengan deklarasi class dan interface untuk setiap modul.
+
+    \item \textbf{bin/}: Direktori output untuk executable:
+          \begin{itemize}
+              \item \texttt{solver}: Binary CLI yang dijalankan dari command line.
+              \item \texttt{solver\_gui}: Binary GUI yang membuka window interaktif (raylib).
+          \end{itemize}
+
+    \item \textbf{build/}: Direktori temporary untuk build artifacts:
+          \begin{itemize}
+              \item \texttt{build/obj/}: Object files (.o) terorganisir per modul.
+              \item \texttt{build/obj\_cli/}: Object files khusus untuk CLI build.
+              \item \texttt{build/obj\_gui/}: Object files khusus untuk GUI build (termasuk raylib linking).
+          \end{itemize}
+
+    \item \textbf{doc/}: Laporan teknis dalam LaTeX:
+          \begin{itemize}
+              \item \texttt{main.tex}: File root LaTeX.
+              \item \texttt{sections/}: Bab-bab laporan (01-pendahuluan, 02-dasar-teori, 03-implementasi, dll).
+              \item \texttt{public/}: Assets (gambar, logo).
+              \item \texttt{dafpus.bib}: Bibliography (referensi akademik).
+          \end{itemize}
+
+    \item \textbf{test/}: Direktori test cases berisi file input (.txt) untuk berbagai skenario puzzle (ukuran 5x5, 6x7, 8x8, dll).
+
+    \item \textbf{external/vcpkg/}: Package manager dan dependency cache untuk library eksternal (raylib, eigen, dll).
+
+    \item \textbf{Makefile}: Script build yang mengompilasi kedua target (CLI dan GUI) dengan flags dan dependency management.
+
+    \item \textbf{vcpkg.json}: Manifest yang mendeskripsikan dependencies proyek (versi raylib, compiler triplet, dll).
+\end{itemize}
+
 \section{Modul-Modul Program}
+
+\subsection{Modul Board}
+
+\textbf{Peran}: Merepresentasikan state papan puzzle dengan menyimpan grid tile, dimensi, posisi aktor, dan informasi checkpoint. Board bertindak sebagai \emph{data model} pusat yang digunakan oleh semua modul lain.
+
+\textbf{Atribut Utama}:
+\begin{itemize}
+    \item \texttt{rows\_, cols\_}: Dimensi board
+    \item \texttt{tiles\_}: 2D vector tile (Path, Wall, Lava, Start, Goal, Checkpoint)
+    \item \texttt{costs\_}: 2D vector cost setiap tile
+    \item \texttt{start\_, goal\_}: Posisi start dan goal
+    \item \texttt{maxCheckpoint\_, checkpoints\_}: Urutan checkpoint yang harus dikunjungi
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Board Class Header]
+    \begin{verbatim}
+class Board {
+public:
+    Board() = default;
+    void init(int rows, int cols);
+    
+    int rows() const;
+    int cols() const;
+    const Position& start() const;
+    const Position& goal() const;
+    int maxCheckpoint() const;
+    
+    void setTile(int row, int col, const Tile& tile);
+    void setCost(int row, int col, int cost);
+
+private:
+    int rows_, cols_;
+    std::vector<std::vector<Tile>> tiles_;
+    std::vector<std::vector<int>> costs_;
+    Position start_, goal_;
+    int maxCheckpoint_;
+    std::vector<Position> checkpoints_;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Search}
+
+\textbf{Peran}: Mengimplementasikan strategi pencarian (UCS, GBFS, A*). Modul ini mengelola frontier (priority queue), tracking bestCost untuk pruning, dan merekonstruksi solusi dari node tujuan.
+
+\textbf{Metode Utama}:
+\begin{itemize}
+    \item \texttt{solve()}: Main algorithm loop yang mengeluarkan node, cek goal, generate successors
+    \item \texttt{computePriority()}: Hitung $f = g + h$ sesuai algoritma pilihan
+    \item \texttt{backtrack()}: Rekonstruksi jalur dari goal ke start
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Search Class Header]
+    \begin{verbatim}
+enum class SearchAlgorithm { UCS, GBFS, AStar };
+
+struct SearchConfig {
+    SearchAlgorithm algorithm = SearchAlgorithm::UCS;
+    HeuristicType heuristic = HeuristicType::Manhattan;
+};
+
+class Search {
+public:
+    SearchResult solve(const Board& board, 
+                      const Rules& rules,
+                      const SearchConfig& config) const;
+private:
+    char dirToChar(MoveDir dir) const;
+    bool isGoalState(const Board& board, 
+                     const Position& pos,
+                     int nextCheckpoint) const;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Rules}
+
+\textbf{Peran}: Mengimplementasikan mekanik permainan (sliding mechanics), validasi gerakan, dan kalkulasi biaya. Modul ini bertanggung jawab untuk transisi state sesuai aturan puzzle.
+
+\textbf{Metode Utama}:
+\begin{itemize}
+    \item \texttt{applyMove()}: Slide aktor ke arah tertentu, return \texttt{MoveOutcome} dengan posisi akhir, biaya, checkpoint status
+    \item \texttt{isInside()}: Validasi posisi dalam bounds
+    \item \texttt{tileCost()}: Ambil cost tile tertentu
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Rules Class Header]
+    \begin{verbatim}
+enum class MoveDir { Up, Down, Left, Right };
+
+struct MoveOutcome {
+    Position end;
+    bool hitWall, outOfBounds, hitLava;
+    bool valid;
+    int nextCheckpoint, moveCost;
+};
+
+class Rules {
+public:
+    MoveOutcome applyMove(const Board& board,
+                         const Position& start,
+                         int checkpointIndex,
+                         MoveDir dir) const;
+private:
+    bool isInside(const Board& board, 
+                 int row, int col) const;
+    Position step(Position pos, MoveDir dir) const;
+    int tileCost(const Board& board, 
+                int row, int col) const;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Heuristic}
+
+\textbf{Peran}: Menyediakan fungsi estimasi untuk menginformasikan pencarian. Menawarkan tiga tipe heuristik untuk mengestimasi biaya sisa dari state saat ini ke goal.
+
+\textbf{Tipe Heuristik}:
+\begin{itemize}
+    \item \texttt{ManhattanToTarget}: Manhattan distance $\times$ cost minimum tile
+    \item \texttt{RemainingPlusManhattan}: $\alpha \cdot r(n) + \beta \cdot \text{manhattan}$
+    \item \texttt{WeightedRemainingToGoal}: $\gamma \cdot r(n) + \delta \cdot \text{manhattan to goal}$
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Heuristic Class Header]
+    \begin{verbatim}
+enum class HeuristicType {
+    ManhattanToTarget,
+    RemainingPlusManhattan,
+    WeightedRemainingToGoal
+};
+
+class Heuristic {
+public:
+    int estimate(const Board& board,
+                const Position& pos,
+                int nextCheckpoint,
+                HeuristicType type) const;
+private:
+    int manhattan(const Position& a,
+                 const Position& b) const;
+    Position resolveTarget(const Board& board,
+                          int nextCheckpoint) const;
+    int remainingCheckpoints(const Board& board,
+                           int nextCheckpoint) const;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Parser}
+
+\textbf{Peran}: Membaca file input (.txt) dan mengkonversi format ASCII ke struktur data internal \texttt{RawInput}. Parser bertanggung jawab untuk ekstraksi data awal sebelum validasi.
+
+\textbf{Metode Utama}:
+\begin{itemize}
+    \item \texttt{parseFile()}: Baca file, ekstrak map, dimensi, dan cost matrix
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Parser Class Header]
+    \begin{verbatim}
+class RawInput {
+public:
+    int rows() const;
+    int cols() const;
+    const std::vector<std::string>& mapLines() const;
+    const std::vector<std::vector<int>>& costs() const;
+    void setDimensions(int rows, int cols);
+    void addMapLine(const std::string& line);
+private:
+    int rows_, cols_;
+    std::vector<std::string> mapLines_;
+    std::vector<std::vector<int>> costs_;
+};
+
+class Parser {
+public:
+    RawInput parseFile(const std::string& path) const;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Validator}
+
+\textbf{Peran}: Memvalidasi integritas input sebelum pencarian dimulai. Memeriksa dimensi, karakter, keberadaan start/goal, dan konsistensi checkpoint sequence. Throw exception jika invalid.
+
+\textbf{Metode Utama}:
+\begin{itemize}
+    \item \texttt{validate()}: Validasi \texttt{RawInput}, return \texttt{Board} object jika valid
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Validator Class Header]
+    \begin{verbatim}
+class Validator {
+public:
+    Board validate(const RawInput& raw) const;
+    // Throws ValidationException jika invalid
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Output}
+
+\textbf{Peran}: Mengformat dan menampilkan hasil solusi dalam berbagai format (board visual, jalur langkah demi langkah, file output, statistik). Modul ini menangani all output operations.
+
+\textbf{Metode Utama}:
+\begin{itemize}
+    \item \texttt{renderBoard()}: Render board ASCII dengan posisi aktor saat ini
+    \item \texttt{printSolutionSteps()}: Print jalur solusi step-by-step
+    \item \texttt{writeSolutionFile()}: Tulis solusi ke file output
+    \item \texttt{writeIterationFile()}: Tulis iteration log untuk analisis
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=OutputRenderer Class Header]
+    \begin{verbatim}
+class OutputRenderer {
+public:
+    std::vector<std::string> renderBoard(
+        const Board& board,
+        const Position& actor,
+        int nextCheckpoint) const;
+    void printBoard(
+        const std::vector<std::string>& lines) const;
+    void printSolutionSteps(
+        const Board& board,
+        const std::vector<Position>& positions,
+        const std::vector<int>& checkpoints,
+        const std::string& moves) const;
+    bool writeSolutionFile(
+        const std::string& path,
+        const Board& board,
+        const SearchResult& result) const;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Playback}
+
+\textbf{Peran}: Memutar kembali solusi secara step-by-step untuk visualisasi dan verifikasi. Digunakan oleh GUI untuk animasi dan oleh CLI untuk interactive replay.
+
+\textbf{Metode Utama}:
+\begin{itemize}
+    \item \texttt{run()}: Eksekusi solusi dengan render setiap step, menunggu input pengguna atau waktu delay
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Playback Class Header]
+    \begin{verbatim}
+class Playback {
+public:
+    void run(const Board& board,
+            const std::vector<Position>& positions,
+            const std::vector<int>& checkpoints,
+            const OutputRenderer& renderer,
+            size_t startIndex) const;
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Modul Exception}
+
+\textbf{Peran}: Menyediakan custom exception classes untuk error handling yang terstruktur dan informatif. Memungkinkan program menangkap dan melaporkan error dengan context yang jelas.
+
+\textbf{Jenis Exception}:
+\begin{itemize}
+    \item \texttt{AppException}: Base exception class
+    \item \texttt{ParseException}: Error saat parsing file
+    \item \texttt{ValidationException}: Error saat validasi input
+    \item \texttt{IOException}: Error saat file I/O operations
+\end{itemize}
+
+\textbf{Code Snippet}:
+\begin{tcolorbox}[colback=blue!5, title=Exception Classes Header]
+    \begin{verbatim}
+enum class ExceptionType { Parse, Validation, IO };
+
+class AppException : public std::runtime_error {
+public:
+    AppException(ExceptionType type,
+                const std::string& message);
+    ExceptionType type() const;
+private:
+    ExceptionType type_;
+};
+
+class ParseException : public AppException {
+public:
+    explicit ParseException(
+        const std::string& message);
+};
+
+class ValidationException : public AppException {
+public:
+    explicit ValidationException(
+        const std::string& message);
+};
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Dependency Antar Modul}
+
+Modul-modul di atas saling bergantung dalam graf berikut:
+
+\begin{itemize}
+    \item \textbf{Search} \(\leftarrow\) Board, Rules, Heuristic, Output
+    \item \textbf{Rules} \(\leftarrow\) Board
+    \item \textbf{Heuristic} \(\leftarrow\) Board
+    \item \textbf{Parser} \(\rightarrow\) RawInput
+    \item \textbf{Validator} \(\leftarrow\) RawInput, Board, Exception
+    \item \textbf{Output} \(\leftarrow\) Board, Search (SearchResult)
+    \item \textbf{Playback} \(\leftarrow\) Board, Rules, Output
+    \item \textbf{Exception}: Digunakan di Parser, Validator, dan modul lainnya untuk error handling
+\end{itemize}
+
+Desain modular ini memastikan setiap modul dapat dikembangkan, ditest, dan dioptimasi secara independen, sambil tetap terintegrasi dengan sempurna dalam sistem keseluruhan.
