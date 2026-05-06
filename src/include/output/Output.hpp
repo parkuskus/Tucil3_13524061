@@ -16,7 +16,7 @@ namespace t3
         void printBoard(const std::vector<std::string> &lines) const;
         void printSolutionSteps(const Board &board, const std::vector<Position> &positions, const std::vector<int> &checkpoints, const std::string &moves) const;
 
-        bool writeSolutionFile(const std::string &path, const SearchResult &result, double elapsedMs) const;
+        bool writeSolutionFile(const std::string &path, const Board &board, const std::vector<Position> &positions, const std::vector<int> &checkpoints, const std::string &moves, const SearchResult &result, double elapsedMs) const;
         bool writeIterationFile(const std::string &path, const std::vector<IterationSnapshot> &log) const;
 
     private:

@@ -15,6 +15,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "heuristic/Heuristic.hpp"
+#include "output/Output.hpp"
 #include "parsing/Parser.hpp"
 #include "rules/Rules.hpp"
 #include "search/Search.hpp"
@@ -791,8 +792,17 @@ int t3::GUI::run()
     jumpInput.text.setFillColor(sf::Color::White);
     setTextInput(jumpInput, "0");
 
+    Button saveButton(font);
+    saveButton.rect.setPosition(sf::Vector2f{20.0f, 570.0f});
+    saveButton.rect.setSize({280.0f, 36.0f});
+    saveButton.rect.setFillColor(sf::Color(58, 102, 148));
+    saveButton.label.setFont(font);
+    saveButton.label.setCharacterSize(15);
+    saveButton.label.setFillColor(sf::Color::White);
+    updateButtonLabel(saveButton, "Save Solution");
+
     sf::Text statusText(font, "", 14);
-    statusText.setPosition(sf::Vector2f{20.0f, 460.0f});
+    statusText.setPosition(sf::Vector2f{20.0f, 625.0f});
 
     auto syncAlgorithm = [](Dropdown &dropdown, t3::SearchAlgorithm &algorithm)
     {
@@ -831,6 +841,40 @@ int t3::GUI::run()
         algorithmDropdown.expanded = false;
         heuristicDropdown.expanded = false;
         fileDropdown.expanded = false;
+    };
+
+    auto dropdownExpansionHeight = [](const Dropdown &dropdown)
+    {
+        return dropdown.expanded ? dropdown.getVisibleCount() * dropdown.rect.getSize().y : 0.0f;
+    };
+
+    auto layoutControls = [&]()
+    {
+        float algorithmShift = dropdownExpansionHeight(algorithmDropdown);
+        float heuristicShift = dropdownExpansionHeight(heuristicDropdown);
+        float fileShift = dropdownExpansionHeight(fileDropdown);
+
+        float afterAlgorithm = algorithmShift;
+        float afterHeuristic = algorithmShift + heuristicShift;
+        float afterFile = algorithmShift + heuristicShift + fileShift;
+
+        algorithmDropdown.rect.setPosition(sf::Vector2f{20.0f, 130.0f});
+        heuristicDropdown.rect.setPosition(sf::Vector2f{20.0f, 172.0f + afterAlgorithm});
+        fileDropdown.rect.setPosition(sf::Vector2f{20.0f, 360.0f + afterHeuristic});
+
+        playButton.rect.setPosition(sf::Vector2f{20.0f, 240.0f + afterHeuristic});
+        prevButton.rect.setPosition(sf::Vector2f{170.0f, 240.0f + afterHeuristic});
+        nextButton.rect.setPosition(sf::Vector2f{240.0f, 240.0f + afterHeuristic});
+
+        speedDownButton.rect.setPosition(sf::Vector2f{20.0f, 290.0f + afterHeuristic});
+        speedLabel.rect.setPosition(sf::Vector2f{90.0f, 290.0f + afterHeuristic});
+        speedUpButton.rect.setPosition(sf::Vector2f{240.0f, 290.0f + afterHeuristic});
+        speedSlider.setGeometry(sf::Vector2f{90.0f, 332.0f + afterHeuristic}, sf::Vector2f{140.0f, 8.0f});
+
+        jumpButton.rect.setPosition(sf::Vector2f{20.0f, 410.0f + afterFile});
+        jumpInput.rect.setPosition(sf::Vector2f{110.0f, 410.0f + afterFile});
+        saveButton.rect.setPosition(sf::Vector2f{20.0f, 570.0f + afterFile});
+        statusText.setPosition(sf::Vector2f{20.0f, 625.0f + afterFile});
     };
 
     sf::Clock clock;
@@ -1008,6 +1052,20 @@ int t3::GUI::run()
                         state.stepIndex = std::min(index, state.result.pathPositions.size() - 1);
                     }
                 }
+                else if (state.hasSolution && saveButton.contains(mouse))
+                {
+                    t3::OutputRenderer renderer;
+                    std::filesystem::path savePath = std::filesystem::path(testFiles[fileDropdown.selectedIndex].label).stem();
+                    std::string outputPath = savePath.string() + "_solution.txt";
+                    if (renderer.writeSolutionFile(outputPath, state.board, state.result.pathPositions, state.result.pathCheckpoints, state.result.moves, state.result, state.elapsedMs))
+                    {
+                        state.status = std::string("Solution saved to ") + outputPath;
+                    }
+                    else
+                    {
+                        state.status = std::string("Failed to save solution to ") + outputPath;
+                    }
+                }
             }
             else if (const auto *mouseWheel = event->getIf<sf::Event::MouseWheelScrolled>())
             {
@@ -1118,12 +1176,19 @@ int t3::GUI::run()
         }
 
         speedSlider.setValue(state.speed);
+        layoutControls();
 
         setDropdownLabel(algorithmDropdown, "Algorithm");
         setDropdownLabel(heuristicDropdown, "Heuristic");
         setDropdownLabel(fileDropdown, "File");
         setTextInput(speedLabel, "Speed: " + formatSpeed(state.speed) + "x");
         updateButtonLabel(playButton, state.playing ? "Pause" : "Play");
+        updateButtonLabel(prevButton, "<");
+        updateButtonLabel(nextButton, ">");
+        updateButtonLabel(speedDownButton, "-");
+        updateButtonLabel(speedUpButton, "+");
+        updateButtonLabel(jumpButton, "Jump");
+        updateButtonLabel(saveButton, "Save Solution");
 
         statusText.setString(state.status + "\n" +
                              "Iterations: " + std::to_string(state.iterations) +
@@ -1174,6 +1239,8 @@ int t3::GUI::run()
             window.draw(jumpButton.label);
             window.draw(jumpInput.rect);
             window.draw(jumpInput.text);
+            window.draw(saveButton.rect);
+            window.draw(saveButton.label);
         }
 
         if (state.boardLoaded)

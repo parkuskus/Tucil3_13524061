@@ -194,7 +194,7 @@ int main(int argc, char **argv)
             std::string solutionPath = readLine();
             if (!solutionPath.empty())
             {
-                if (!renderer.writeSolutionFile(solutionPath, result, elapsedMs))
+                if (!renderer.writeSolutionFile(solutionPath, board, result.pathPositions, result.pathCheckpoints, result.moves, result, elapsedMs))
                 {
                     std::cout << "Gagal menyimpan solusi pada: " << solutionPath << "\n";
                 }

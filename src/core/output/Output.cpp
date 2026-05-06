@@ -1,5 +1,6 @@
 #include "output/Output.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -58,7 +59,7 @@ namespace t3
         }
     }
 
-    bool OutputRenderer::writeSolutionFile(const std::string &path, const SearchResult &result, double elapsedMs) const
+    bool OutputRenderer::writeSolutionFile(const std::string &path, const Board &board, const std::vector<Position> &positions, const std::vector<int> &checkpoints, const std::string &moves, const SearchResult &result, double elapsedMs) const
     {
         std::ofstream output(path);
         if (!output)
@@ -66,18 +67,45 @@ namespace t3
             return false;
         }
 
+        auto writeBoardState = [&](const Position &actor, int nextCheckpoint)
+        {
+            const std::vector<std::string> lines = renderBoard(board, actor, nextCheckpoint);
+            for (const auto &line : lines)
+            {
+                output << line << "\n";
+            }
+        };
+
         if (!result.found)
         {
-            output << "No solution found.\n";
-            output << "Iterations: " << result.iterations << "\n";
-            output << "Time (ms): " << elapsedMs << "\n";
+            output << "Solusi tidak ditemukan.\n";
+            output << "Waktu eksekusi: " << static_cast<long long>(std::llround(elapsedMs)) << " ms\n";
+            output << "Banyak iterasi yang dilakukan: " << result.iterations << " iterasi\n";
             return true;
         }
 
-        output << "Solution moves: " << result.moves << "\n";
-        output << "Total cost: " << result.totalCost << "\n";
-        output << "Iterations: " << result.iterations << "\n";
-        output << "Time (ms): " << elapsedMs << "\n";
+        output << "Solusi Yang Ditemukan : " << moves << "\n";
+        output << "Cost dari Solusi : " << result.totalCost << "\n\n";
+
+        if (!positions.empty())
+        {
+            output << "Initial\n";
+            int initialCheckpoint = checkpoints.empty() ? 0 : checkpoints[0];
+            writeBoardState(positions[0], initialCheckpoint);
+            output << "\n";
+
+            for (size_t i = 1; i < positions.size(); ++i)
+            {
+                char moveChar = (i - 1 < moves.size()) ? moves[i - 1] : '?';
+                output << "Step " << i << " : " << moveChar << "\n";
+                int checkpoint = (i < checkpoints.size()) ? checkpoints[i] : initialCheckpoint;
+                writeBoardState(positions[i], checkpoint);
+                output << "\n";
+            }
+        }
+
+        output << "Waktu eksekusi: " << static_cast<long long>(std::llround(elapsedMs)) << " ms\n";
+        output << "Banyak iterasi yang dilakukan: " << result.iterations << " iterasi\n";
         return true;
     }
 
