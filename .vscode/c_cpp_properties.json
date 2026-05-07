@@ -5,12 +5,12 @@
       "name": "Win32",
       "includePath": [
         "${workspaceFolder}/src/include",
-        "${workspaceFolder}/vcpkg_installed/x64-linux/include",
-        "${workspaceFolder}/vcpkg_installed/x64-linux/include/SFML"
+        "${workspaceFolder}/vcpkg_installed/x64-mingw-dynamic/include",
+        "${workspaceFolder}/vcpkg_installed/x64-mingw-dynamic/include/SFML"
       ],
       "defines": [],
       "windowsSdkVersion": "10.0.22621.0",
-      "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
+      "compilerPath": "C:/Strawberry/c/bin/g++.exe",
       "cStandard": "c17",
       "cppStandard": "c++17",
       "intelliSenseMode": "windows-gcc-x64"
