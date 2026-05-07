@@ -1,5 +1,56 @@
 \section{Testing Kasus Dasar}
+\begin{longtable}{c c c p{6cm}}
+    \caption{Hasil eksperimen: input, output, dan deskripsi}\label{tab:eksperimen}                                                                                                                                                                                                             \\
+    \hline
+    No & Gambar Input                                                   & Gambar Output                                                   & Deskripsi                                                                                                                                          \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}{{\bfseries \tablename\ \thetable{} -- lanjutan dari halaman sebelumnya}}                                                                                                                                                                                                \\
+    \hline
+    No & Gambar Input                                                   & Gambar Output                                                   & Deskripsi                                                                                                                                          \\
+    \hline
+    \endhead
+    \hline \multicolumn{4}{r}{{Lanjutan pada halaman berikutnya}}                                                                                                                                                                                                                              \\
+    \endfoot
+    \hline
+    \endlastfoot
+
+    1  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-1.png} & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-1.png} & Test case pada ukuran $7 \times 7$ dengan Solusi Yang Ditemukan : \texttt{RULUDRUR} dan Cost dari Solusi : 87                                      \\
+    2  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-2.png} & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-2.png} & Test case dengan ukuran $ 5 \times 5$ dengan Solusi Yang Ditemukan : \texttt{DR} dan Cost dari Solusi : 22                                         \\
+    3  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-3.png} & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-3.png} & Test case dengan ukuran $8 \times 8$ dengan Solusi Yang Ditemukan : \texttt{RD} dan Cost dari Solusi : 37                                          \\
+
+    4  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-4.png} & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-4.png} & Test case untuk ukuran $7 \times 8$ dengan Solusi Yang Ditemukan : \texttt{RULDUR} dan Cost dari Solusi : 2083                                     \\
+
+    5  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-5.png} & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-5.png} & Test case untuk ukuran $15 \times 15$ dengan Solusi Yang Ditemukan : \texttt{URLDURDRDLURDRULDLURULDLDRURULDRDLRDRDLD} dan Cost dari Solusi : 1026 \\
+\end{longtable}
 
 \section{Testing \textit{Edge Cases}}
+
+
+\begin{longtable}{c c c p{6cm}}
+    \caption{Hasil eksperimen: input, output, dan deskripsi}\label{tab:eksperimen}                                                                                                                  \\
+    \hline
+    No & Gambar Input                                                    & Gambar Output                                                    & Deskripsi                                             \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}{{\bfseries \tablename\ \thetable{} -- lanjutan dari halaman sebelumnya}}                                                                                                     \\
+    \hline
+    No & Gambar Input                                                    & Gambar Output                                                    & Deskripsi                                             \\
+    \hline
+    \endhead
+    \hline \multicolumn{4}{r}{{Lanjutan pada halaman berikutnya}}                                                                                                                                   \\
+    \endfoot
+    \hline
+    \endlastfoot
+
+    1  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-6.png}  & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-6.png}  & Test case pada papan yang tidak memiliki solusi       \\
+    2  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-7.png}  & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-7.png}  & Test case dengan papan checkpoint yang tidak kontigu. \\
+    3  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-8.png}  & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-8.png}  & Test case dengan papan tidak memiliki titik mulai (Z) \\
+
+    4  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-9.png}  & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-9.png}  & Test case untuk papan yang karakternya invalid.       \\
+
+    5  & \includegraphics[width=0.25\linewidth]{04-eksperimen/in-10.png} & \includegraphics[width=0.25\linewidth]{04-eksperimen/out-10.png} & Test case untuk papan yang tidak punya pembatas.      \\
+\end{longtable}
+
 
 \section{\textit{Post Mortem Analysis}}
