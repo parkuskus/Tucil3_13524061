@@ -1,8 +1,14 @@
+\section{Kesimpulan}
+
+Tugas Kecil 3 ini telah berhasil mengimplementasikan solver untuk Ice Sliding Puzzle dengan tiga algoritma pathfinding utama (UCS, GBFS, dan A*) beserta tiga heuristik yang berbeda. Sistem mencakup mekanika permainan lengkap dengan deteksi batas papan, dinding, lava, sistem checkpoint berurutan yang valid, serta validasi input komprehensif. Fitur output mencakup visualisasi langkah-langkah solusi, playback interaktif, dan penyimpanan hasil ke file. Dua entry point (CLI dan GUI berbasis SFML) tersedia untuk memudahkan penggunaan, dan pengujian dilakukan pada 10 test case yang mencakup kasus dasar hingga edge cases.
+
+Tantangan teknis yang dihadapi selama pengembangan antara lain state space representation yang harus mencakup posisi dan checkpoint index, cost calculation yang akurat, priority queue tie-breaking, heuristik non-admissible yang dapat menyebabkan sub-optimal, GUI performance pada papan besar, dan cross-platform compatibility untuk playback CLI. Setiap tantangan berhasil diatasi dengan solusi yang tepat dan teruji. Pengembangan ke depan dapat fokus pada algoritma alternatif (IDDFS, Beam Search), heuristik lebih sophisticated (Pattern Database, Linear Conflict), optimasi state space, parallelisasi, integrasi machine learning, benchmark suite yang lebih ekstensif, visualisasi advanced, papan procedural, mobile port, dan formal verification.
+
 Tugas ini disusun sepenuhnya tanpa bantuan kecerdasan buatan (Generative AI),
 melainkan hasil pemikiran dan analisis mandiri.
 
 \begin{flushright}
-    Bandung, 25 Maret 2026
+    Bandung, 7 Mei 2026
     \vspace{3px}
 
     \includegraphics[width=0.4\textwidth]{ttd-aufar.png}

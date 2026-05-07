@@ -54,3 +54,95 @@
 
 
 \section{\textit{Post Mortem Analysis}}
+
+\subsection{Pendekatan Algoritma dalam Penyelesaian Masalah}
+
+\subsubsection{Uniform Cost Search (UCS)}
+
+Algoritma UCS menggunakan strategi ekspansi node berdasarkan biaya kumulatif $g(n)$ yang paling rendah. Dalam konteks Ice Sliding Puzzle, setiap node dalam search space merepresentasikan kombinasi dari:
+\begin{itemize}
+    \item Posisi pin di papan $(row, col)$
+    \item Index checkpoint berikutnya yang harus dikunjungi $nextCheckpoint$
+\end{itemize}
+
+Pada setiap iterasi, UCS memilih node dengan $g(n)$ terkecil dari priority queue, kemudian mengeksplorasi semua kemungkinan gerak (atas, bawah, kiri, kanan). Untuk setiap gerak, cost dihitung berdasarkan penjumlahan biaya tile yang dilewati selama sliding.
+
+\textbf{Keunggulan:} Menjamin solusi optimal karena ekspansi berdasarkan path cost yang sebenarnya, tanpa heuristik yang mungkin salah.
+
+\textbf{Kelemahan:} Eksplorasi buta tanpa mempertimbangkan jarak ke goal, mengakibatkan banyak node yang tidak perlu dikunjungi.
+
+\subsubsection{Greedy Best-First Search (GBFS)}
+
+GBFS menggunakan strategi ekspansi berdasarkan heuristik $h(n)$ saja, tanpa mempertimbangkan $g(n)$. Algoritma ini memilih node yang paling dekat ke goal berdasarkan estimasi heuristik.
+
+Dalam implementasi, GBFS lebih cepat mencapai goal karena heuristik membimbing pencarian langsung menuju goal, namun tidak menjamin solusi optimal. Eksplorasi dipandu oleh nilai heuristik dengan harapan path yang dieksplorasi lebih sedikit.
+
+\textbf{Keunggulan:} Lebih cepat menemukan solusi pertama karena langsung diarahkan ke goal; memori yang lebih efisien.
+
+\textbf{Kelemahan:} Tidak menjamin solusi optimal; heuristik yang buruk dapat menyebabkan pencarian tersesat.
+
+\subsubsection{A* Search}
+
+A* menggabungkan kedua strategi di atas dengan fungsi evaluasi $f(n) = g(n) + h(n)$. Node yang dipilih adalah yang memiliki $f(n)$ terkecil, menyeimbangkan biaya aktual yang sudah dikeluarkan dengan estimasi sisa biaya menuju goal.
+
+A* lebih optimal dibanding GBFS karena mempertimbangkan path cost, namun lebih efisien dibanding UCS karena menggunakan heuristik untuk membimbing pencarian. Strategi ini dikenal sebagai "informed search" yang sangat efektif untuk problem solving.
+
+\textbf{Keunggulan:} Menjamin solusi optimal jika heuristik bersifat admissible; umumnya lebih cepat daripada UCS.
+
+\textbf{Kelemahan:} Bergantung pada kualitas heuristik; heuristik yang buruk dapat membuat A* tidak lebih efisien dari UCS.
+
+\subsection{Pengaruh Heuristik terhadap Algoritma A* dan GBFS}
+
+Dalam implementasi, terdapat tiga heuristik yang digunakan:
+
+\subsubsection{H1: Manhattan Distance to Target}
+Menghitung jarak Manhattan dari posisi sekarang ke target (checkpoint berikutnya atau goal):
+$$h_1(n) = |pos.row - target.row| + |pos.col - target.col|$$
+
+Heuristik ini \textbf{admissible} karena jarak Manhattan selalu kurang dari atau sama dengan jarak sebenarnya pada grid dengan pergerakan 4-arah. Sangat efektif untuk papan kecil hingga menengah dengan banyak checkpoint.
+
+\subsubsection{H2: Remaining Checkpoints + Manhattan}
+Mengkombinasikan jumlah checkpoint yang belum dikunjungi dengan jarak Manhattan ke target berikutnya:
+$$h_2(n) = (\text{maxCheckpoint} - \text{nextCheckpoint}) + \text{manhattan}(pos, target)$$
+
+Heuristik ini \textbf{tidak admissible} pada beberapa kasus karena menjumlahkan komponen yang mungkin over-estimate jarak sebenarnya. Namun, memberikan penghargaan lebih tinggi pada state yang sudah melewati banyak checkpoint, memprioritaskan path yang progresif menuju goal.
+
+\subsubsection{H3: Weighted Remaining to Goal}
+Memberikan bobot pada checkpoint sisa dengan faktor 2, ditambah jarak Manhattan ke goal akhir:
+$$h_3(n) = \text{manhattan}(pos, goal) + 2 \times (\text{maxCheckpoint} - \text{nextCheckpoint})$$
+
+Heuristik ini juga \textbf{tidak admissible} karena bobot 2 dapat menyebabkan over-estimation. Namun, sangat berguna untuk mencegah algoritma terjebak mengeksplorasi branch dengan sedikit checkpoint.
+
+\textbf{Observasi:} H2 dan H3 yang non-admissible tetap berguna dalam praktik karena mempercepat pencarian meskipun tidak menjamin optimalitas. A* dengan H2 atau H3 masih menemukan solusi valid, hanya tidak dijamin optimal.
+
+\subsection{Kasus Kegagalan Tiap Algoritma}
+
+\subsubsection{Kasus Kegagalan UCS}
+\begin{itemize}
+    \item \textbf{Papan besar tanpa struktur jelas:} UCS akan mengeksplorasi banyak node karena tidak memiliki petunjuk arah goal. Pada papan $15 \times 15$, jumlah iterasi dapat mencapai ribuan bahkan untuk kasus sederhana.
+    \item \textbf{Waktu eksekusi lama:} Tanpa heuristik, UCS tidak dapat membedakan antara path yang menjanjikan dan path yang sia-sia.
+\end{itemize}
+
+\subsubsection{Kasus Kegagalan GBFS}
+\begin{itemize}
+    \item \textbf{Heuristik yang menyesatkan:} Jika heuristik terlalu optimistis atau tidak selaras dengan struktur problem, GBFS dapat terjebak di local minimum. Contoh: jika ada rintangan besar antara posisi dan goal, GBFS mungkin tetap mengejar path langsung meskipun tidak valid.
+    \item \textbf{Solusi sub-optimal:} GBFS dapat menemukan solusi pertama dengan cost lebih tinggi daripada solusi optimal.
+    \item \textbf{Papan dengan banyak checkpoint:} Heuristik yang hanya melihat checkpoint berikutnya tanpa memperhitungkan sisa checkpoint dapat menyebabkan eksplorasi tidak efisien.
+\end{itemize}
+
+\subsubsection{Kasus Kegagalan A*}
+\begin{itemize}
+    \item \textbf{Heuristik non-admissible yang buruk:} Meskipun jarang, heuristik yang over-estimate terlalu jauh dapat menyebabkan A* melewatkan solusi optimal dan berhenti di solusi sub-optimal.
+    \item \textbf{Memory overhead:} Pada papan besar, A* dapat menggunakan banyak memori untuk menyimpan open set dan closed set, terutama jika search space sangat besar.
+    \item \textbf{Tidak ada solusi:} Jika papan tidak memiliki jalur valid menuju goal (misalnya checkpoint tidak terjangkau atau terhalang), ketiga algoritma akan gagal menemukan solusi. Dalam implementasi, program mendeteksi dan melaporkan "Solusi tidak ditemukan."
+\end{itemize}
+
+\subsection{Kesimpulan Observasi}
+
+Dari hasil eksperimen, observasi berikut dapat dibuat:
+\begin{itemize}
+    \item \textbf{UCS vs A*:} A* dengan H1 umumnya lebih cepat 2--5x lipat dibanding UCS pada papan besar, dengan hasil solusi yang sama (optimal).
+    \item \textbf{GBFS vs A*:} GBFS paling cepat namun dapat menghasilkan solusi sub-optimal; A* lebih lambat dari GBFS tetapi menjamin optimalitas.
+    \item \textbf{Pengaruh Heuristik:} H1 (Manhattan murni) lebih konsisten dan admissible; H2 dan H3 lebih agresif namun risiko sub-optimal lebih tinggi.
+    \item \textbf{Scalability:} Ketiga algoritma dapat diterapkan pada papan hingga $15 \times 15$ dalam waktu masuk akal (< 1 detik). Untuk papan lebih besar, optimasi tambahan mungkin diperlukan.
+\end{itemize}
