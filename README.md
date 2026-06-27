@@ -1,59 +1,59 @@
 # Ice Sliding Puzzle Solver
 
-![Foto Kelompok](cover.png)
+![Group Photo](cover.png)
 
-## Deskripsi Singkat
+## Overview
 
-Ice Sliding Puzzle Solver adalah program untuk mencari solusi permainan ice sliding puzzle dengan tiga algoritma pathfinding, yaitu Uniform Cost Search (UCS), Greedy Best-First Search (GBFS), dan A*. Program ini membaca file input papan, memvalidasi aturan permainan, mencari solusi, lalu menampilkan hasil berupa urutan langkah, total cost, jumlah iterasi, waktu eksekusi, visualisasi papan, dan playback solusi.
+Ice Sliding Puzzle Solver is a program that finds solutions to ice sliding puzzles using three pathfinding algorithms: Uniform Cost Search (UCS), Greedy Best-First Search (GBFS), and A*. The program reads a board input file, validates the game rules, searches for a solution, and displays the results including move sequence, total cost, iteration count, execution time, board visualization, and solution playback.
 
-## Fitur-Fitur Program
+## Features
 
-- Mendukung tiga algoritma pencarian: UCS, GBFS, dan A*.
-- Mendukung tiga heuristik: Manhattan to Target, Remaining Checkpoints + Manhattan, dan Weighted Remaining to Goal.
-- Validasi input papan, checkpoint, start, goal, dan karakter yang diperbolehkan.
-- Perhitungan cost berdasarkan tile yang dilewati selama sliding.
-- Visualisasi langkah solusi di CLI.
-- Playback solusi setelah pencarian selesai.
-- Penyimpanan solusi dan log iterasi ke file `.txt`.
-- GUI berbasis SFML untuk visualisasi interaktif.
+- Supports three search algorithms: UCS, GBFS, and A*.
+- Supports three heuristics: Manhattan to Target, Remaining Checkpoints + Manhattan, and Weighted Remaining to Goal.
+- Input validation for board layout, checkpoints, start position, goal, and allowed characters.
+- Cost calculation based on tiles traversed during sliding.
+- Step-by-step solution visualization in the CLI.
+- Solution playback after the search completes.
+- Save solution and iteration log to a `.txt` file.
+- SFML-based GUI for interactive visualization.
 
-## Struktur Project
+## Project Structure
 
 ```text
 Tucil3_13524061/
-├── bin/                # Executable hasil build
-├── doc/                # Dokumen laporan dan aset pendukung
-├── src/                # Source code program
-├── test/               # File test case input
+├── bin/                # Build output executables
+├── doc/                # Report documents and supporting assets
+├── src/                # Program source code
+├── test/               # Input test case files
 ├── Makefile            # Build script
-├── LICENSE             # Lisensi project
-└── README.md           # Dokumentasi utama
+├── LICENSE             # Project license
+└── README.md           # Main documentation
 ```
 
-## Requirement
+## Requirements
 
-- Compiler C++17, seperti `g++` atau `clang++`.
+- C++17 compiler such as `g++` or `clang++`.
 - GNU Make.
-- Library SFML untuk GUI.
-- `vcpkg` atau setup library lokal yang sesuai untuk environment Anda.
+- SFML library for the GUI.
+- `vcpkg` or a local library setup appropriate for your environment.
 
 ## How To Run
 
 ### CLI
 
-Build program CLI:
+Build the CLI program:
 
 ```bash
 make build
 ```
 
-Jalankan program CLI dengan file input:
+Run the CLI program with an input file:
 
 ```bash
 make run INPUT=test/test-1-base-case.txt
 ```
 
-Atau jalankan executable secara langsung setelah build:
+Or run the executable directly after building:
 
 ```bash
 ./bin/solver test/test-1-base-case.txt
@@ -61,38 +61,38 @@ Atau jalankan executable secara langsung setelah build:
 
 ### GUI
 
-Build program GUI:
+Build the GUI program:
 
 ```bash
 make gui
 ```
 
-Jalankan GUI:
+Run the GUI:
 
 ```bash
 make run-gui
 ```
 
-## Format Input File
+## Input File Format
 
-Format file input adalah:
+The input file format is:
 
 ```text
 N M
-[N baris peta]
-[N baris cost per tile]
+[N rows of the map]
+[N rows of tile costs]
 ```
 
-Keterangan simbol pada peta:
+Map symbol reference:
 
 - `*` = path
-- `X` = batu / rintangan
+- `X` = rock / obstacle
 - `L` = lava
-- `Z` = posisi awal
-- `O` = tujuan
-- `0`-`9` = checkpoint yang harus dilewati berurutan
+- `Z` = starting position
+- `O` = goal
+- `0`-`9` = checkpoints that must be visited in order
 
-Contoh singkat:
+Short example:
 
 ```text
 3 3
@@ -106,9 +106,10 @@ Z*0
 
 ## License
 
-Project ini menggunakan lisensi MIT. Lihat file [LICENSE](LICENSE) untuk detail lengkap.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full details.
 
 ## Author
 
-Muhammad Aufar Rizqi Kusuma  
-13524061
+| Name                        | Student ID |
+|-----------------------------|------------|
+| Muhammad Aufar Rizqi Kusuma | 13524061   |
